@@ -3411,7 +3411,7 @@
     function applyToDOM(root) {
         const container = root || document;
 
-        const v = (typeof window !== "undefined" && window.PYXIS_VERSION) || "1.1.4";
+        const v = (typeof window !== "undefined" && window.PYXIS_VERSION) || "—";
         const stage = (typeof window !== "undefined" && window.PYXIS_STAGE) || "Beta";
         const full = (typeof window !== "undefined" && window.PYXIS_FULL_VERSION) || (stage + " v" + v);
         const defaultParams = { version: v, stage: stage, full_version: full };

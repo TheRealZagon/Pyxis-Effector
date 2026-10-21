@@ -14,7 +14,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 # For any question you can visit: https://discord.gg/fsxRESeQZN
 
-"""Persistent storage for Pyxis Engine 1.1.4 templates."""
+"""Persistent storage for Pyxis Engine templates."""
 
 from __future__ import annotations
 
@@ -30,8 +30,12 @@ from typing import Any
 
 try:
     from version import PYXIS_VERSION as PYXIS_ENGINE_VERSION
-except ImportError:
-    PYXIS_ENGINE_VERSION = "1.1.4"
+except ImportError as exc:
+    # La versión solo vive en src/version.py: no se duplica aquí para que no se desincronice.
+    raise RuntimeError(
+        "Falta PyxisNodes/src/version.py (instalación incompleta). "
+        "Reinstala el motor de Pyxis desde GitHub Releases."
+    ) from exc
 SCHEMA_VERSION = 1
 _SAFE_NAME_RE = re.compile(r"[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_-]+")
 

@@ -95,6 +95,11 @@ La macro de Aegisub descarga `PyxisEffector-v<versión>-<plataforma>.zip` de la 
 **`v<versión>`**, donde `<versión>` es el `script_version` de `pyxis.NodeEngine.lua`. El workflow
 `release.yml` publica con esa etiqueta, así que para sacar una release basta con:
 
+> El número de versión solo vive en `script_version` de `pyxis.NodeEngine.lua`,
+> `PyxisNodes/src/version.py` y `PyxisNodes/web/version.js` (más los badges de los README,
+> que se actualizan al publicar). El resto del código lo lee de ahí; no lo escribas ni lo
+> dejes como respaldo en ningún otro archivo.
+
 ```bash
 git tag v1.1.5 && git push origin v1.1.5
 ```

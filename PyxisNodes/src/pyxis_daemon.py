@@ -35,8 +35,12 @@ except ImportError:
 
 try:
     from version import PYXIS_VERSION
-except ImportError:
-    PYXIS_VERSION = "1.1.4"
+except ImportError as exc:
+    # La versión solo vive en src/version.py: no se duplica aquí para que no se desincronice.
+    raise RuntimeError(
+        "Falta PyxisNodes/src/version.py (instalación incompleta). "
+        "Reinstala el motor de Pyxis desde GitHub Releases."
+    ) from exc
 
 PYXIS_DAEMON_PORT = 28723
 

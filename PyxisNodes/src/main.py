@@ -16,7 +16,7 @@
 
 """Pyxis Effector — Main PyWebView application bootstrap and JS-Python API bridge.
 
-Provides the primary graphical runtime for Pyxis Node Engine 1.1.4, managing
+Provides the primary graphical runtime for Pyxis Node Engine, managing
 PyWebView window initialisation, thread pooling, log buffering, OS job objects,
 configuration persistence, template storage, dialogue windows, script syntax
 validation, and communication bridges between client-side JavaScript and backend
@@ -120,13 +120,12 @@ try:
         PYXIS_FULL_VERSION,
         PYXIS_VERSION_STRING
     )
-except ImportError:
-    PYXIS_ENGINE_VERSION = "1.1.4"
-    PYXIS_APP_ID = "Mandholine.Pyxis.NodeEngine.1.1.4"
-    PYXIS_CLIENT_AUTH = "pyxis-beta-1.1.4-client"
-    PYXIS_STAGE = "Beta"
-    PYXIS_FULL_VERSION = "Beta v1.1.4"
-    PYXIS_VERSION_STRING = "v1.1.4"
+except ImportError as exc:
+    # La versión solo vive en src/version.py: no se duplica aquí para que no se desincronice.
+    raise RuntimeError(
+        "Falta PyxisNodes/src/version.py (instalación incompleta). "
+        "Reinstala el motor de Pyxis desde GitHub Releases."
+    ) from exc
 
 
 def _pyxis_user_data_base() -> str:
