@@ -91,7 +91,7 @@ Pyxis Effector includes a comprehensive technical manual structured across 12 mo
 
 Installation is the same on every platform:
 
-1. Download [`pyxis.NodeEngine.lua`](https://raw.githubusercontent.com/Mandholine/Pyxis-Effector/main/pyxis.NodeEngine.lua) (it is also attached to every release in [**Releases**](https://github.com/Mandholine/Pyxis-Effector/releases)).
+1. Download [`pyxis.NodeEngine.lua`](https://github.com/Mandholine/Pyxis-Effector/releases/latest/download/pyxis.NodeEngine.lua) (it is attached to every release in [**Releases**](https://github.com/Mandholine/Pyxis-Effector/releases)).
 2. Copy it into Aegisub's `automation/autoload` folder (see the table).
 3. Open Aegisub and run **Automation** $\to$ **Pyxis Node Engine**. The first time, the macro offers to download the engine (`PyxisNodes/`) automatically.
 
@@ -107,10 +107,12 @@ If you would rather install it by hand or offline, download the package for your
 
 > **If you have `Pyxis_engine.lua`** from an earlier version, delete it: it is the same script under another name and Aegisub would load the macro twice.
 
+> ⚠️ **Untested macOS:** the `macos-arm64` and `macos-x64` packages are built automatically but **have not been tested on Mac hardware**. If you use them, bug reports and contributions (issues and PRs) are welcome.
+
 **Requirements:** Aegisub 3.2.x, 3.3.x or 3.4.x (Automation 4). On Windows, also the Microsoft Visual C++ Redistributable (2015-2022 x64); if the Microsoft Edge WebView2 Runtime is missing, Pyxis offers to install it on first launch.
 
 * Linux: **[PyxisNodes/README.linux.md](PyxisNodes/README.linux.md)** (system dependencies, XDG data locations, installing from source with `install_linux.sh`, troubleshooting; in Spanish).
-* macOS: **[PyxisNodes/README.macos.md](PyxisNodes/README.macos.md)** (Gatekeeper, Homebrew, installing from source with `install_macos.sh`; in Spanish). macOS support is implemented but **has not been tested on real Mac hardware yet**.
+* macOS: **[PyxisNodes/README.macos.md](PyxisNodes/README.macos.md)** (Gatekeeper, Homebrew, installing from source with `install_macos.sh`; in Spanish).
 * To build the packages yourself (and to download or compile ffmpeg): [tools/README.md](tools/README.md) (in Spanish).
 
 ---

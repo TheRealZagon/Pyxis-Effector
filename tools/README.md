@@ -89,6 +89,19 @@ Versiones por defecto: ffmpeg 9.0.2, libwebp 1.6.0, x264 `stable`. Se cambian co
 `--webp-version` y `--x264-ref`. Junto al binario se escribe `ffmpeg-build-info.json` con las
 versiones y el commit exacto de x264.
 
+## Prueba de humo
+
+`tools/smoke_test.py` procesa un .ass de karaoke generado por el propio script con el motor de
+nodos (secuencial y multiproceso) y comprueba que se generan líneas de efecto, que todas llevan
+el marcador `pyxis_fx` y que ambos modos producen exactamente el mismo resultado:
+
+```bash
+python3 tools/smoke_test.py
+```
+
+El workflow `smoke-test.yml` la ejecuta automáticamente en Linux, Windows y macOS en cada push
+y pull request.
+
 ## Publicar una release
 
 La macro de Aegisub descarga `PyxisEffector-v<versión>-<plataforma>.zip` de la release cuya etiqueta es
@@ -109,6 +122,10 @@ git tag v1.1.5 && git push origin v1.1.5
 * **Forks:** la macro descarga de `Mandholine/Pyxis-Effector`. Para probar las releases de un fork sin tocar
   el código, abre Aegisub con `PYXIS_RELEASE_REPO=usuario/repositorio` en el entorno. Para que un fork las use
   siempre, cambia la constante `RELEASE_REPO` de `pyxis.NodeEngine.lua`.
+
+El workflow adjunta también `pyxis.NodeEngine.lua` como asset de la release: el enlace de instalación
+de los README usa `releases/latest/download/pyxis.NodeEngine.lua`, así que **el nombre de ese asset
+no debe cambiar**.
 
 ## Licencia
 
