@@ -96,15 +96,14 @@ La macro de Aegisub descarga `PyxisEffector-v<versión>-<plataforma>.zip` de la 
 `release.yml` publica con esa etiqueta, así que para sacar una release basta con:
 
 ```bash
-git tag v1.1.4 && git push origin v1.1.4
+git tag v1.1.5 && git push origin v1.1.5
 ```
 
-* Si la etiqueta `v<versión>` no existe, la macro prueba también `PyxisEffector-v<versión>-<plataforma>`, la
-  etiqueta que usó la primera release (subida a mano, solo Windows).
+* Si la etiqueta `v<versión>` no existe, la macro prueba también `PyxisEffector-v<versión>-<plataforma>` y
+  `PyxisEffector_v<versión>_<plataforma>`, las etiquetas que han usado las releases subidas a mano.
 * **Forks:** la macro descarga de `Mandholine/Pyxis-Effector`. Para probar las releases de un fork sin tocar
   el código, abre Aegisub con `PYXIS_RELEASE_REPO=usuario/repositorio` en el entorno. Para que un fork las use
-  siempre, cambia la constante `RELEASE_REPO` de `pyxis.NodeEngine.lua` y las URL de `DependencyControl.json`
-  (y actualiza su `sha1`: `sha1sum pyxis.NodeEngine.lua`).
+  siempre, cambia la constante `RELEASE_REPO` de `pyxis.NodeEngine.lua`.
 
 ## Licencia
 

@@ -12,24 +12,13 @@
 --
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see <https://www.gnu.org/licenses/>.
--- For any question you can visit: https://discord.gg/rYsARc3fB9
+-- For any question you can visit: https://discord.gg/fsxRESeQZN
 
 script_name        = "Pyxis Node Engine"
 script_description = "Visual Node-Based Karaoke Automation"
 script_author      = "Pyxis Dev Team"
-script_version     = "1.1.4"
+script_version     = "1.1.5"
 script_namespace   = "pyxis.NodeEngine"
-
-local depctrl_ok, DependencyControl = pcall(require, "l0.DependencyControl")
-local version_record = nil
-
-if depctrl_ok and (type(DependencyControl) == "table" or type(DependencyControl) == "function") then
-    pcall(function()
-        version_record = DependencyControl{
-            feed = "https://raw.githubusercontent.com/Mandholine/Pyxis-Effector/master/DependencyControl.json"
-        }
-    end)
-end
 
 local ffi = require("ffi")
 local unicode = require("aegisub.unicode")
@@ -82,12 +71,14 @@ do
 end
 
 -- URL candidatas del paquete, por orden. Las releases nuevas (tools/build_release.py + CI)
--- usan la etiqueta v<versión>; la primera release, subida a mano, usó otra para Windows.
+-- usan la etiqueta v<versión>; las releases publicadas a mano usan el nombre del paquete
+-- como etiqueta, con guiones (v1.1.4) o con guiones bajos (v1.1.5) según la release.
 local function release_urls(zip_name, tag)
     local base = "https://github.com/" .. RELEASE_REPO .. "/releases/download/"
     return {
         base .. "v" .. script_version .. "/" .. zip_name,
         base .. "PyxisEffector-v" .. script_version .. "-" .. tag .. "/" .. zip_name,
+        base .. "PyxisEffector_v" .. script_version .. "_" .. tag .. "/" .. zip_name,
     }
 end
 
@@ -647,7 +638,7 @@ function launch_Pyxis(subs, sel, act)
     local exported_dialogue_subs_indices = {}
     for i = 1, #subs do
         local l = subs[i]
-        if l.class == "dialogue" and l.effect ~= "Pyxis_fx" then
+        if l.class == "dialogue" and l.effect ~= "pyxis_fx" then
             exported_dialogue_subs_indices[#exported_dialogue_subs_indices + 1] = i
             current_sub_state = current_sub_state .. l.raw .. (sel_map[i] and "1" or "0")
         end
@@ -703,7 +694,7 @@ function launch_Pyxis(subs, sel, act)
         local total_lines = #subs
         for i = 1, total_lines do
             local line = subs[i]
-            if line.class == "dialogue" and line.effect ~= "Pyxis_fx" then
+            if line.class == "dialogue" and line.effect ~= "pyxis_fx" then
                 if sel_map[i] then
                     file:write(string.format(
                         "Comment: %d,%s,%s,%s,%s,%d,%d,%d,PyxisMetrics,sel=1\n",
@@ -911,7 +902,7 @@ function launch_Pyxis(subs, sel, act)
     for idx, _ in pairs(used_subs_indices) do
         has_used_indices = true
         local line = subs[idx]
-        if line and line.class == "dialogue" and line.effect ~= "Pyxis_fx" then
+        if line and line.class == "dialogue" and line.effect ~= "pyxis_fx" then
             line.comment = true
             subs[idx] = line
         end
@@ -921,7 +912,7 @@ function launch_Pyxis(subs, sel, act)
     if not has_used_indices then
         for _, idx in ipairs(sel) do
             local line = subs[idx]
-            if line and line.class == "dialogue" and line.effect ~= "Pyxis_fx" then
+            if line and line.class == "dialogue" and line.effect ~= "pyxis_fx" then
                 line.comment = true
                 subs[idx] = line
             end
@@ -944,8 +935,4 @@ function launch_Pyxis(subs, sel, act)
     return sel, act
 end
 
-if version_record and version_record.registerMacro then
-    version_record:registerMacro(launch_Pyxis)
-else
-    aegisub.register_macro(script_name, script_description, launch_Pyxis)
-end
+aegisub.register_macro(script_name, script_description, launch_Pyxis)

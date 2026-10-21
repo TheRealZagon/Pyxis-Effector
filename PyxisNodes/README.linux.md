@@ -72,7 +72,7 @@ python3 -m venv --system-site-packages .venv
    * `pyxis.NodeEngine.lua`
 2. En Aegisub: **Automatización → Pyxis Node Engine**.
 3. La macro exporta las líneas seleccionadas, abre el editor visual y, al generar,
-   inyecta las capas de efectos (`Pyxis_fx`) en la subtítulo.
+   inyecta las capas de efectos (`pyxis_fx`) en la subtítulo.
 
 Flujo en Linux (idéntico a Windows):
 
