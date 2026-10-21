@@ -41,7 +41,7 @@ Fixed permanently along the top edge of the window:
 ```
 
 1. **Version Identifier:**
-   * Engine brand name and active version badge (`v1.1.4`).
+   * Engine brand name and active version badge (`v<versión>`).
 
 2. **Save (`Save` / `Ctrl+S`):**
    * Saves changes directly to the currently opened template or project file.

@@ -41,7 +41,7 @@ Ubicada de forma fija en el margen superior de la ventana:
 ```
 
 1. **Identificador de Versión:**
-   * Nombre del motor y distintivo de versión activa (`v1.1.4`).
+   * Nombre del motor y distintivo de versión activa (`v<versión>`).
 
 2. **Guardar (`Save` / `Ctrl+S`):**
    * Guarda los cambios directamente sobre la plantilla o archivo actualmente abierto.
