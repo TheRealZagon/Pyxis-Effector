@@ -5620,8 +5620,8 @@ class PyxisAPI:
                 import base64
                 with open(img_path, "rb") as f:
                     b64 = base64.b64encode(f.read()).decode("utf-8")
-                ext = os.path.splitext(img_path)[1].lower().replace(".", "")
-                mime = "image/png" if ext == "png" else f"image/{ext}"
+                import mimetypes
+                mime = mimetypes.guess_type(img_path)[0] or "image/png"
                 return {"success": True, "data_url": f"data:{mime};base64,{b64}"}
             return {"success": False, "error": f"Image '{safe_name}' not found"}
         except Exception as e:

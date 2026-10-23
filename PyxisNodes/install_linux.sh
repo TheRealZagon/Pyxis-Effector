@@ -118,4 +118,4 @@ echo "  • Desde Aegisub: copia PyxisNodes/ y los archivos .lua en tu carpeta d
 echo "    automation/autoload y ejecuta la macro 'Pyxis Node Engine'."
 echo "  • De forma independiente: $VENV_DIR/bin/python $PYXIS_DIR/main.py"
 echo ""
-echo "Consulta README.linux.md para más detalles."
+echo "Consulta la sección «Linux» del README.md principal para más detalles."

@@ -46,29 +46,29 @@
 
 ## Philosophy and Origin
 
-**Pyxis Effector** renovates and extends the technical architecture of the legacy **Kara Effector 3.6** project, replacing sequential monolithic script execution with a visual environment structured around directed acyclic graphs (DAGs). The system combines a Python 3.12 core, GPU acceleration, real-time WebAssembly rendering, and comprehensive support for Advanced SubStation Alpha (ASS) vector subtitle manipulation.
+**Pyxis Effector** builds on the architecture of the legacy **Kara Effector 3.6** project and replaces its sequential scripts with a visual environment based on directed acyclic graphs (DAGs). It has a Python 3.12 core, GPU acceleration, real-time WebAssembly rendering, and vector manipulation of Advanced SubStation Alpha (ASS) subtitles.
 
-The project is named after the **Pyxis** constellation (The Mariner's Compass), symbolising technical orientation and the modular convergence between kinetic typography, spatial geometry, temporal kinematics, and algorithmic logic.
+The name comes from the **Pyxis** constellation (the Mariner's Compass), and refers to technical orientation and the combination of kinetic typography, spatial geometry, temporal kinematics, and algorithmic logic.
 
 ---
 
 ## Key Features
 
-* **Modular DAG Visual Canvas:** Interactive visual effect composition by interconnecting data and context ports without requiring mandatory sequential scripting.
-* **Hybrid Execution Architecture:** Optimised Python 3.12 runtime supporting multi-process parallel evaluation and OpenCL GPU acceleration.
-* **Real-Time Synchronised Preview:** Integrated canvas player powered by WebAssembly-compiled ASS rendering (JASSUB/libass) and ArtPlayer.js.
-* **Vector Morphology and Polygons:** Glyph outline conversion, bitmap raster vectorisation via Potrace, and boolean polygon operations (union, difference, intersection, xor, offsetting) via Clipper2.
-* **Spectral Acoustic Analysis:** Root Mean Square (RMS) power envelopes, acoustic peaks, frequency band filtering, and Fast Fourier Transform (FFT) linked to project audio.
-* **Dual Scripting Environment:** Imperative `System/Script Code` nodes with native execution support for Python 3.12 and Lua 5.1/LuaJIT via a low-latency bidirectional C bridge (Lupa).
-* **Pre-Generation Linter and Diagnostics:** Static syntax validator (`node_validator.py`) with real-time AST analysis for ASS Dark Tags, undeclared variables, and topological integrity.
-* **ASS Render Telemetry and Profiling (`libass` + QPC):** Multi-process frame-by-frame profiling of subtitle render costs, frame budget consumption, and bitmap memory, with an interactive workload heatmap in the player. Native on Windows; on Linux and macOS it runs through Wine (provisional workaround).
-* **Persistence and Template Management:** Full graph export/import, session isolation, and user template storage in `%APPDATA%\PyxisNodes\` (Windows) or `~/.local/share/PyxisNodes` (Linux/macOS).
+* **DAG Visual Editor:** Effects are built by connecting data and context ports, with no code required.
+* **Hybrid Execution:** Python 3.12 core with multi-process parallel evaluation and OpenCL GPU acceleration.
+* **Real-Time Preview:** Synchronised player built into the canvas, using WebAssembly ASS rendering (JASSUB/libass) and ArtPlayer.js.
+* **Vector Morphology and Polygons:** Glyph outline conversion, bitmap vectorisation via Potrace, and boolean polygon operations (union, difference, intersection, xor, offsetting) via Clipper2.
+* **Audio Analysis:** Root Mean Square (RMS) envelopes, peaks, frequency band filtering, and Fast Fourier Transform (FFT) on the project audio.
+* **Python and Lua Scripting:** Imperative `System/Script Code` nodes run Python 3.12 and Lua 5.1/LuaJIT through a bidirectional C bridge (Lupa).
+* **Pre-Generation Linter:** Static validator (`node_validator.py`) with real-time AST analysis of ASS Dark Tags, undeclared variables, and topological integrity.
+* **ASS Render Telemetry and Profiling (`libass` + QPC):** Multi-process, frame-by-frame measurement of render cost, frame budget consumption, and bitmap memory, with an interactive heatmap in the player. Native on Windows; on Linux and macOS it runs through Wine (provisional workaround).
+* **Persistence and Templates:** Full graph export/import, session isolation, and template storage in `%APPDATA%\PyxisNodes\` (Windows) or `~/.local/share/PyxisNodes` (Linux/macOS).
 
 ---
 
 ## Official Technical Manual
 
-Pyxis Effector includes a comprehensive technical manual structured across 12 modular volumes, available in British English in [`PyxisNodes/docs/en/`](PyxisNodes/docs/en/) (and in Spanish in [`PyxisNodes/docs/es/`](PyxisNodes/docs/es/)):
+The technical manual is split into 12 volumes, in British English in [`PyxisNodes/docs/en/`](PyxisNodes/docs/en/) (Spanish version in [`PyxisNodes/docs/es/`](PyxisNodes/docs/es/)):
 
 | Volume | Title | Primary Technical Scope |
 | :---: | :--- | :--- |
@@ -111,9 +111,187 @@ If you would rather install it by hand or offline, download the package for your
 
 **Requirements:** Aegisub 3.2.x, 3.3.x or 3.4.x (Automation 4). On Windows, also the Microsoft Visual C++ Redistributable (2015-2022 x64); if the Microsoft Edge WebView2 Runtime is missing, Pyxis offers to install it on first launch.
 
-* Linux: **[PyxisNodes/README.linux.md](PyxisNodes/README.linux.md)** (system dependencies, XDG data locations, installing from source with `install_linux.sh`, troubleshooting; in Spanish).
-* macOS: **[PyxisNodes/README.macos.md](PyxisNodes/README.macos.md)** (Gatekeeper, Homebrew, installing from source with `install_macos.sh`; in Spanish).
+* Linux and macOS (system dependencies, Gatekeeper, installing from source, user data, troubleshooting): [Linux](#linux) and [macOS](#macos), below.
 * To build the packages yourself (and to download or compile ffmpeg): [tools/README.md](tools/README.md) (in Spanish).
+
+---
+
+## Linux and macOS
+
+### Linux
+
+The `linux64` or `linux-arm64` package (see the table above) creates `PyxisNodes/` with its own Python 3.12, the dependencies and Qt WebEngine for the interface. You only need what the package cannot carry:
+
+* `ffmpeg`: the package includes one (a GPL build from BtbN with libx264, libass and libwebp, verified by SHA-256). If it was built with `--no-ffmpeg`, install it with your package manager.
+* The system libraries Qt WebEngine requires. On a normal desktop they are already installed (`libnss3`, `libxkbcommon`, `libxcb-*`…).
+
+The rest of this section covers **installing from source**.
+
+#### System requirements (installing from source)
+
+| Component | Required | Purpose | Debian / Ubuntu | Arch |
+|---|---|---|---|---|
+| Python ≥ 3.10 | Yes | Execution engine | `python3 python3-venv` | `python` |
+| ffmpeg | Yes | Audio and video | `ffmpeg` | `ffmpeg` |
+| WebKitGTK 4.1 | Yes* | GUI (`gtk` backend) | `python3-gi gir1.2-webkit2-4.1` | `python-gobject webkit2gtk-4.1` |
+| Qt WebEngine | Alternative* | GUI (`qt` backend) | `python3-pyqt6.qtwebengine` | `python-pyqt6-webengine` |
+| fontconfig | Recommended | Font resolution | `fontconfig` | `fontconfig` |
+| potrace | Optional | Fast image vectorisation | `potrace` | `potrace` |
+| tkinter | Optional | Fallback file dialogues | `python3-tk` | `tk` |
+| wmctrl / xdotool | Optional | Raising window focus | `wmctrl` / `xdotool` | same |
+
+\* You need **one** of the two graphical backends. GTK (WebKitGTK) is the recommended one.
+
+Aegisub is available in most distributions (`aegisub` or `aegisub-git`).
+
+#### Installation
+
+```bash
+git clone https://github.com/Mandholine/Pyxis-Effector.git
+cd Pyxis-Effector/PyxisNodes
+./install_linux.sh
+```
+
+The installer creates a virtual environment in `PyxisNodes/.venv`, installs the Python dependencies (`requirements.txt`) and checks the system dependencies.
+
+Equivalent manual installation:
+
+```bash
+cd PyxisNodes
+python3 -m venv --system-site-packages .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+> `--system-site-packages` is required so the virtual environment can see the GTK/Qt bindings (`python-gobject` / PyQt) installed by the distribution's package manager.
+
+#### Using it with Aegisub
+
+1. Copy these into your Aegisub automation folder (`~/.config/aegisub/automation/autoload/`, or `?user/automation/autoload` inside Aegisub):
+   * `PyxisNodes/` (the whole folder, including `.venv`)
+   * `pyxis.NodeEngine.lua`
+2. In Aegisub: **Automation → Pyxis Node Engine**.
+3. The macro exports the selected lines, opens the visual editor and, on generation, inserts the effect layers (`pyxis_fx`) into the subtitles.
+
+The flow is identical to Windows:
+
+* The macro looks for the interpreter in this order: `PyxisNodes/python/bin/python3` (release package), `PyxisNodes/.venv/bin/python3`, the system `python3`, and `python`.
+* If you cloned the repository, `PyxisNodes/python/` may contain the Windows runtime (`python.exe`); it is not used on Linux. The Linux packages are built with `python tools/build_release.py` and do not share that directory.
+* The process is launched detached (`nohup … &`); the local HTTP daemon (`127.0.0.1:28723`) allows instant reopening without relaunching Python.
+* If the daemon detects that Aegisub has closed (by PID), it shuts itself down.
+
+Standalone use (without Aegisub):
+
+```bash
+cd PyxisNodes
+.venv/bin/python main.py
+```
+
+#### Data locations (XDG)
+
+User data lives in `$XDG_DATA_HOME/PyxisNodes` (by default `~/.local/share/PyxisNodes`):
+
+| Path | Contents |
+|---|---|
+| `~/.local/share/PyxisNodes/user_config.json` | Settings, window geometry |
+| `~/.local/share/PyxisNodes/temp_cache/` | Temporary bridge with Aegisub |
+| `~/.local/share/PyxisNodes/temp/` | Internal temporaries, audio cache |
+| `~/.local/share/PyxisNodes/templates/` | User templates |
+| `~/.local/share/PyxisNodes/themes/` | Custom themes |
+
+Windows keeps its historical location (`%APPDATA%\PyxisNodes`). macOS uses the same path as Linux.
+
+#### Feature parity
+
+The code remains compatible with Windows.
+
+| Feature | Windows | Linux |
+|---|---|---|
+| Node editor, preview, particles | ✔ | ✔ |
+| Font metrics and outlines | Win32 GDI | **FreeType + fontconfig** (`freetype-py`) |
+| Text to vector shape (`text_to_shape`) | GDI outlines | Real FreeType outlines |
+| Audio / video | Bundled ffmpeg | Bundled ffmpeg in the release package; the system one if you install from source |
+| Image vectorisation | potrace.exe | System potrace (Python fallback) |
+| GPU OpenCL / CUDA | ✔ | ✔ (pyopencl / CPU fallback) |
+| libass telemetry (`libass_profiler`) | ✔ | ✔ through **Wine** (see below); without Wine, a handled error |
+| Child process cleanup | Job Object | `PR_SET_PDEATHSIG` |
+| Automatic engine download from the macro | ✔ (win64 zip) | ✔ (linux64 zip) or manual installation |
+
+* `bin/*.exe` is not used on Linux, except `libass_profiler.exe` through Wine.
+* To obtain or build your own ffmpeg from the repository, see [tools/README.md](tools/README.md) (`python tools/get_ffmpeg.py` or `python tools/get_ffmpeg.py --build`).
+
+#### Render telemetry (Wine, provisional)
+
+`libass_profiler` exists only as a Windows binary (`bin/libass_profiler.exe`). If `wine` is installed, Pyxis runs it through Wine automatically (it is a console tool and needs no display). This is a provisional workaround until a native port exists:
+
+* The first run creates a dedicated Wine prefix in `~/.local/share/PyxisNodes/wine` (about 10 s); later runs take a fraction of a second.
+* Render times are indicative: they measure libass inside Wine, with its own font resolution (DirectWrite over fontconfig) and without the same caches as Windows.
+* If you place a native `libass_profiler` in `PyxisNodes/bin/` (or on the `PATH`), it takes priority and Wine is no longer used.
+* Environment variables: `PYXIS_DISABLE_WINE=1` (never use Wine), `PYXIS_WINE=<path>` (a different wine executable), `PYXIS_WINEPREFIX=<dir>` (a different prefix).
+* Installing Wine: `sudo apt install wine` / `sudo pacman -S wine`.
+
+#### Troubleshooting
+
+* **"Graphical backend NOT available"** → install `python3-gi gir1.2-webkit2-4.1` (GTK) or your distribution's Qt WebEngine package, and recreate the venv with `--system-site-packages`.
+* **The macro cannot find Python** → run `install_linux.sh` to create `PyxisNodes/.venv`, or install `python3` on the PATH.
+* **Inaccurate font metrics** → install `fontconfig` and check that the family exists (`fc-match "Font Name"`). Pyxis resolves fonts the way Aegisub does: if a family does not exist, fontconfig's substitution is used.
+* **The window does not open** → check `~/.local/share/PyxisNodes/temp/*_debug.log` (start-up writes the full traceback there).
+* **Audio is not processed** → `ffmpeg` is mandatory; check with `ffmpeg -version`.
+
+### macOS
+
+Pyxis Effector runs on macOS (Apple Silicon and Intel) using Cocoa/WebKit for the interface and the Aegisub Automation 4 macro.
+
+> **Status:** macOS support is implemented but has not yet been tested on Mac hardware. If you hit a problem, open an issue with the contents of `~/.local/share/PyxisNodes/temp/` (start-up logs).
+
+#### Installation (release package, recommended)
+
+Install as described in [Quick Installation and Usage](#quick-installation-and-usage), using `macos-arm64` for Apple Silicon Macs (M1 or later) or `macos-x64` for Intel Macs. The package ships its own Python 3.12 and all dependencies: you do not need Homebrew or a separate Python.
+
+**Gatekeeper.** The packages are not signed with an Apple certificate. If you download them with a browser, macOS quarantines them and blocks the bundled Python. Remove the flag once:
+
+```bash
+xattr -dr com.apple.quarantine ~/Library/Application\ Support/Aegisub/automation/autoload/PyxisNodes
+```
+
+If the macro downloads the engine itself, it runs that command automatically.
+
+**ffmpeg.** The package includes a native ffmpeg for your architecture (from [ffmpeg.martin-riedl.de](https://ffmpeg.martin-riedl.de), with libx264, libass, libwebp and VideoToolbox, verified by SHA-256). If it was built with `--no-ffmpeg`, install it with Homebrew (`brew install ffmpeg`); Pyxis also searches `/opt/homebrew/bin` and `/usr/local/bin`, even if Aegisub is launched from the Finder with a minimal `PATH`. `potrace` is optional (`brew install potrace`).
+
+To build your own ffmpeg from source, see [tools/README.md](tools/README.md).
+
+#### Installing from source
+
+```bash
+brew install python ffmpeg        # Python ≥ 3.10; /usr/bin/python3 is too old
+cd PyxisNodes && ./install_macos.sh
+```
+
+Then copy `PyxisNodes/` and `pyxis.NodeEngine.lua` into Aegisub's `autoload` folder. The macro uses `PyxisNodes/.venv/bin/python3` if there is no runtime in `PyxisNodes/python/`.
+
+Standalone use: `PyxisNodes/.venv/bin/python PyxisNodes/main.py`.
+
+#### Differences from Windows
+
+| Feature | macOS |
+|---|---|
+| Interface | Cocoa/WebKit (pywebview) |
+| Font metrics and outlines | FreeType; fonts are located in `/System/Library/Fonts`, `/Library/Fonts` and `~/Library/Fonts` |
+| Video encoding | `h264_videotoolbox` if ffmpeg includes it; otherwise x264 |
+| GPU OpenCL | Optional (Apple has deprecated it); if it fails, the CPU is used |
+| libass telemetry (`libass_profiler`) | Only through Wine (see below); without Wine, a handled error |
+| Child process cleanup | Parent-process watchdog in each worker |
+
+#### Telemetry through Wine (untested on macOS)
+
+`libass_profiler` exists only as a Windows binary. Pyxis tries to run it through Wine if it finds it (`brew install --cask wine-stable`, Wine Stable/Staging/Devel, or CrossOver in `/Applications`). **This route has not been tested on macOS** (it has on Linux): Wine on macOS exists only for Intel, so on Apple Silicon it needs Rosetta 2. If it does not work, telemetry is disabled with an error message and the rest of Pyxis is unaffected. The details (dedicated prefix, the `PYXIS_WINE` and `PYXIS_DISABLE_WINE` variables, timing accuracy) are the same as on [Linux](#render-telemetry-wine-provisional). A native `libass_profiler` in `PyxisNodes/bin/` will take priority once one exists.
+
+#### Troubleshooting
+
+* **"Cocoa bindings missing"** → reinstall with `pip install --force-reinstall pywebview`.
+* **The macro cannot find Python** → reinstall the release package or run `install_macos.sh`.
+* **"'python3' cannot be opened because the developer cannot be verified"** → see *Gatekeeper*.
+* **The window does not open** → check `~/.local/share/PyxisNodes/temp/*_debug.log` and `preflight_debug.log`.
+* **Audio is not processed** → check `ffmpeg -version` from a Terminal.
 
 ---
 
@@ -127,13 +305,13 @@ If you would rather install it by hand or offline, download the package for your
 
 ## Historical Acknowledgments
 
-Special recognition is extended to the developers and contributors of the historical **Kara Effector 3.6 legacy** project, whose pioneering concepts and subtitle automation algorithms laid the foundation that inspired this visual node architecture.
+Thanks to the developers and contributors of the historical **Kara Effector 3.6 legacy** project, whose ideas and subtitle automation algorithms inspired this visual node architecture.
 
 ---
 
 ## Third-Party Code and External Credits
 
-Pyxis Effector integrates and builds upon the following open-source libraries and technologies:
+Pyxis Effector uses the following open-source libraries and components:
 
 * [**LiteGraph.js**](https://github.com/jagenjo/litegraph.js): Interactive visual canvas and node graph execution engine (MIT Licence).
 * [**Ace Editor**](https://github.com/ajaxorg/ace): Embedded code editor for scripting nodes (BSD Licence).
@@ -141,25 +319,24 @@ Pyxis Effector integrates and builds upon the following open-source libraries an
 * [**JASSUB**](https://github.com/ThaUnknown/jassub) / [**libass**](https://github.com/libass/libass): WebAssembly-compiled ASS subtitle renderer (MIT / ISC / GPL Licences).
 * [**Clipper2**](https://github.com/AngusJohnson/Clipper2) / [**PyClipper**](https://github.com/fonttools/pyclipper): Polygon clipping, boolean operations, and contour offsetting engine (BSL-1.0 Licence).
 * [**Potrace**](https://potrace.sourceforge.net/): Bitmap-to-vector curve tracing utility (GPL v2+ Licence).
-* [**KaTeX**](https://katex.org/): Fast mathematical formula typesetting engine for interface and documentation (MIT Licence).
+* [**KaTeX**](https://katex.org/): Maths typesetting for the interface and documentation (MIT Licence).
 * [**Marked.js**](https://marked.js.org/): Markdown parser and compiler for integrated documentation and tooltips (MIT Licence).
-* [**Lupa**](https://github.com/scoder/lupa): High-performance C bridge connecting Python to LuaJIT / Lua 5.1 (MIT Licence).
-* [**PyWebView**](https://pywebview.flowrl.com/): Lightweight desktop webview window wrapper for Windows, macOS and Linux (BSD-3 Licence).
+* [**Lupa**](https://github.com/scoder/lupa): C bridge between Python and LuaJIT / Lua 5.1 (MIT Licence).
+* [**PyWebView**](https://pywebview.flowrl.com/): Native desktop webview window for Windows, macOS and Linux (BSD-3 Licence).
 * [**FFmpeg**](https://ffmpeg.org/): Multimedia decoding, PCM stream extraction, and video processing. The core is LGPL v2.1+, but the packages ship **GPL v2+** builds (with libx264, libass and libwebp) from [BtbN](https://github.com/BtbN/FFmpeg-Builds) (Windows and Linux) and [martin-riedl.de](https://ffmpeg.martin-riedl.de) (macOS).
 * [**Python**](https://www.python.org/) via [**python-build-standalone**](https://github.com/astral-sh/python-build-standalone): Standalone interpreter bundled in every package (PSF Licence).
 * [**PyQt6**](https://www.riverbankcomputing.com/software/pyqt/) / [**Qt WebEngine**](https://www.qt.io/): Graphical interface bundled in the Linux packages (GPL v3 / LGPL v3 Licences).
 * [**FreeType**](https://freetype.org/) / [**freetype-py**](https://github.com/rougier/freetype-py): Font metrics and outlines on Linux and macOS (FreeType / BSD Licences).
 * [**NumPy**](https://numpy.org/) / [**Pillow**](https://python-pillow.org/): Particle, audio and image processing (BSD-3 / HPND Licences).
 * [**Wine**](https://www.winehq.org/): Optional; runs `libass_profiler.exe` on Linux and macOS (LGPL v2.1+ Licence).
+* [**Aegisub**](https://github.com/TypesettingTools/Aegisub): The interface icon for the active-project mode is `aegisub-icon-mk2.svg` (BSD-3-Clause Licence, © 2004-2012 Aegisub Project).
 
 ---
 
-## AI Disclosure and Transparency Notice
+## AI Disclosure
 
-In the interest of transparency and clear authorship practices, please note that:
-
-* The technical design and web interface architecture of this project were developed with technical assistance from **Google Gemini** via **Antigravity**.
-* Linux and macOS support (engine adaptation, packaging with a bundled Python, continuous integration and the `tools/` scripts) was developed with the assistance of AI models: **Claude** (Anthropic) and **MiMo 2.6 Pro** (Xiaomi), the latter through **OpenCode Go**.
+* The technical design and web interface architecture were developed with help from **Google Gemini** via **Antigravity**.
+* Linux and macOS support (engine adaptation, packaging with a bundled Python, continuous integration and the `tools/` scripts) was developed with help from AI models: **Claude** (Anthropic) and **MiMo 2.6 Pro** (Xiaomi), the latter through **OpenCode Go**.
 
 ---
 

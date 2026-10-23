@@ -1,16 +1,16 @@
 # Base Environment and Customisation
 
-The **Base Environment** (`preview_base.ass`) provides an isolated workspace for previewing and validating effects independently from the primary subtitle script loaded in Aegisub.
-It documents the lifecycle of the file in `%APPDATA%`, the temporal clip window model, its style structure, and reactive hot-reloading.
+The **Base Environment** (`preview_base.ass`) is an isolated workspace for previewing and testing effects without using the subtitle script loaded in Aegisub.
+This page covers the file's lifecycle in `%APPDATA%`, the temporal clip window, its style structure, and hot-reloading.
 
 ---
 
 ## 1. Architecture and Preview Modes
 
-The **`System/Previewer`** node includes a source toggle that switches between two operational modes:
+The **`System/Previewer`** node has a source toggle with two modes:
 
-* **Active Project Mode (Aegisub Icon):** Connects the real-time player to the video, audio, styles, and dialogue lines currently loaded in the active Aegisub session.
-* **Base Preset Mode (CD Disc Icon):** Temporarily detaches the player from Aegisub to project the graph output onto the `preview_base.ass` file within a standardised, reproducible laboratory environment.
+* **Active Project Mode (Aegisub Icon):** The player uses the video, audio, styles, and dialogue lines currently loaded in the active Aegisub session.
+* **Base Preset Mode (CD Disc Icon):** The player detaches from Aegisub and renders the graph output over `preview_base.ass`, a fixed and reproducible test environment.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -33,7 +33,7 @@ The **`System/Previewer`** node includes a source toggle that switches between t
 ## 2. Lifecycle and Persistence in `%APPDATA%`
 
 ### 2.1. Filesystem Location
-The base script resides in the Windows user profile configuration directory:
+The base script lives in the Windows user profile configuration directory:
 
 ```
 %APPDATA%\PyxisNodes\preview_base.ass
@@ -41,32 +41,32 @@ The base script resides in the Windows user profile configuration directory:
 
 *(Standard path: `C:\Users\<User>\AppData\Roaming\PyxisNodes\preview_base.ass`)*.
 
-### 2.2. Zero-Overwrite Policy (User Data Integrity)
-Pyxis Effector enforces a strict preservation rule regarding user data:
-1. **Initial Execution:** If the file does not exist in `%APPDATA%\PyxisNodes\`, the engine automatically copies the default factory template bundled with the installation package.
-2. **Version Upgrades:** Once generated, **Pyxis never overwrites or deletes this file**. All customisations—including custom styles, canvas dimensions, video links, and syllable test phrases—belong exclusively to the user and remain fully persistent across software releases.
+### 2.2. Zero-Overwrite Policy
+Pyxis Effector never overwrites your copy of the file:
+1. **First run:** If the file does not exist in `%APPDATA%\PyxisNodes\`, the engine copies the default template bundled with the installation.
+2. **Upgrades:** Once created, **Pyxis never overwrites or deletes this file**. Your custom styles, canvas dimensions, video links, and test phrases belong to you and persist across releases.
 
-### 2.3. Reactive SHA-256 Hash Invalidation (Hot-Reloading)
-To eliminate the need to restart the application or re-instantiate the `System/Previewer` node when modifying the base environment, the backend inspects the cryptographic signature of the file:
-* Upon each preview compilation request, the engine calculates the `SHA-256` checksum of `preview_base.ass` on disk.
-* When the user modifies and saves `preview_base.ass` in Aegisub or an external text editor, the altered hash automatically invalidates the in-memory cache (`_cached_preview_base_info`).
-* The player immediately updates native canvas resolution, frame rate, audio track, and typographic geometry in real time.
+### 2.3. SHA-256 Hash Invalidation (Hot-Reloading)
+You do not need to restart the application or recreate the `System/Previewer` node after editing the base environment. The backend checks the file's hash instead:
+* On each preview compilation request, the engine calculates the `SHA-256` checksum of `preview_base.ass` on disk.
+* When you edit and save `preview_base.ass` in Aegisub or an external text editor, the changed hash invalidates the in-memory cache (`_cached_preview_base_info`).
+* The player then updates the canvas resolution, frame rate, audio track, and typographic geometry immediately.
 
 ---
 
-## 3. Mathematical Model of the Temporal Clip Window
+## 3. Temporal Clip Window
 
-Pyxis does not restrict playback to the strict syllable duration of the base script; it dynamically computes an **automated temporal buffer (*Lead-In / Lead-Out Cushion*)** to allow full visual evaluation of entry and exit transitions:
+Pyxis does not limit playback to the syllable duration in the base script. It adds a **lead-in / lead-out buffer** so you can see entry and exit transitions in full.
 
-### 3.1. Temporal Window Formulations
+### 3.1. Formulas
 
-Let $\mathcal{D} = \{d_1, d_2, \dots, d_m\}$ be the set of dialogue lines defined in `preview_base.ass`, where each line possesses a start timestamp $t_{\text{start}}(d_i)$ and end timestamp $t_{\text{end}}(d_i)$ in milliseconds:
+Let $\mathcal{D} = \{d_1, d_2, \dots, d_m\}$ be the set of dialogue lines in `preview_base.ass`, where each line has a start timestamp $t_{\text{start}}(d_i)$ and end timestamp $t_{\text{end}}(d_i)$ in milliseconds:
 
 $$t_{\text{min}} = \min_{d \in \mathcal{D}} \big(t_{\text{start}}(d)\big)$$
 
 $$t_{\text{max}} = \max_{d \in \mathcal{D}} \big(t_{\text{end}}(d)\big)$$
 
-From these bounds, the engine establishes the relative clip interval in seconds:
+From these bounds, the engine computes the clip interval in seconds:
 
 $$t_{\text{clip\_start}} = \max\left(0.0, \; \frac{t_{\text{min}} - 2000}{1000.0}\right)$$
 
@@ -76,16 +76,16 @@ $$T_{\text{clip\_dur}} = \max\left(2.0, \; t_{\text{clip\_end}} - t_{\text{clip\
 
 $$t_{\text{clip\_start\_ms}} = \lfloor t_{\text{clip\_start}} \times 1000 \rfloor$$
 
-### 3.2. Practical Function of the 2000 ms Cushion
-* **Evaluation of `Time/Lead In` Nodes:** Spatial animations that trigger prior to syllable activation (e.g. off-screen approaches, exponential velocity curves `accel`, or progressive reveals) receive up to 2000 ms of preparatory lead time.
-* **Evaluation of `Time/Lead Out` Nodes:** Post-syllable transitions (`\fad`, stochastic particle dispersion, alpha dissolution) retain 2000 ms of trailing playback before the timeline loops.
-* **Relative Timeline Scrubbing:** The scrubber in `Previewer` maps relative position $00:00$ precisely to $t_{\text{clip\_start\_ms}}$, allowing designers to inspect the active phase without dead timeline margins.
+### 3.2. What the 2000 ms Cushion Is For
+* **`Time/Lead In` nodes:** Animations that start before the syllable (off-screen approaches, exponential velocity curves `accel`, progressive reveals) get up to 2000 ms of lead time.
+* **`Time/Lead Out` nodes:** Transitions after the syllable (`\fad`, particle dispersion, alpha dissolve) get 2000 ms of trailing playback before the timeline loops.
+* **Scrubber:** The `Previewer` scrubber maps relative position $00:00$ to $t_{\text{clip\_start\_ms}}$, so there is no dead time at the start of the timeline.
 
 ---
 
-## 4. Anatomy and Internal Structure of `preview_base.ass`
+## 4. Structure of `preview_base.ass`
 
-The `preview_base.ass` script adheres to the standard ASS format (*v4.00+*), organised into four functional sections:
+`preview_base.ass` is a standard ASS (*v4.00+*) file with four sections:
 
 ```ini
 [Script Info]
@@ -119,65 +119,65 @@ Dialogue: 1,0:00:05.00,0:00:10.00,Default,,0,0,0,,{\k43}Ma{\k65}ry {\k44}te{\k87
 
 ---
 
-## 5. Technical Customisation Guide
+## 5. Customisation Guide
 
-### 5.1. Step 1: Set Native Canvas Resolution (`PlayResX` / `PlayResY`)
-The script resolution establishes the Cartesian plane for both absolute positioning and relative anchor offsets:
-* **Full HD Resolution (1080p):**
+### 5.1. Step 1: Set the Canvas Resolution (`PlayResX` / `PlayResY`)
+The script resolution defines the coordinate plane for absolute positions and relative anchor offsets:
+* **Full HD (1080p):**
   ```ini
   PlayResX: 1920
   PlayResY: 1080
   ```
-* **Standard HD Resolution (720p):**
+* **HD (720p):**
   ```ini
   PlayResX: 1280
   PlayResY: 720
   ```
 > [!NOTE]
-> The WebAssembly rendering engine (`JASSUB`) and ArtPlayer adapt automatically to the aspect ratio ($\text{AR} = \text{PlayResX} / \text{PlayResY}$) and scale output surfaces to eliminate anamorphic distortion.
+> The WebAssembly renderer (`JASSUB`) and ArtPlayer adapt automatically to the aspect ratio ($\text{AR} = \text{PlayResX} / \text{PlayResY}$) and scale the output to avoid anamorphic distortion.
 
-### 5.2. Step 2: Configure Reference Media Sources
-Under `[Aegisub Project Garbage]`, specify your preferred testing assets:
+### 5.2. Step 2: Configure Reference Media
+Under `[Aegisub Project Garbage]`, set the test media you want to use:
 
 #### Option A: Synthetic Dummy Video (Recommended)
-Provides instant startup at 23.976 or 60 FPS without requiring physical video storage on disk:
+Starts instantly at 23.976 or 60 FPS and needs no video file on disk:
 ```ini
 Video File: ?dummy:23.976000:40000:1920:1080:26:26:26:
 ```
 * **Syntax:** `?dummy:<FPS>:<FrameCount>:<Width>:<Height>:<R>:<G>:<B>:`
-* The colour values `26:26:26:` produce a neutral dark grey backdrop that provides clean contrast for white particles, outline strokes, and luminous glows.
+* The colour values `26:26:26:` give a neutral dark grey background that contrasts well with white particles, outline strokes, and glows.
 
-#### Option B: Real Local Video and Audio Media
-When calibrating lip synchronisation, spectral envelope modulation with `Audio/Modulator`, or transient detection in `Audio/Waveform`, point directly to a local multimedia file:
+#### Option B: Real Local Video and Audio
+To calibrate lip sync, spectral envelope modulation with `Audio/Modulator`, or transient detection in `Audio/Waveform`, point to a local media file:
 ```ini
 Video File: C:\KaraokeResources\test_track_1080p.mp4
 Audio File: C:\KaraokeResources\test_track_1080p.mp4
 ```
 > [!TIP]
-> If the video file contains an embedded audio track, specifying `Video File` is sufficient; Pyxis automatically decodes and routes the acoustic stream to the PCM buffer and spectral analyser.
+> If the video file has an embedded audio track, setting `Video File` is enough; Pyxis decodes it and feeds the PCM buffer and spectral analyser automatically.
 
-### 5.3. Step 3: Calibrate Baseline Typographic Styles (`[V4+ Styles]`)
-Pyxis scans `[V4+ Styles]` and extracts the **first defined style** as the canonical reference:
+### 5.3. Step 3: Set the Baseline Style (`[V4+ Styles]`)
+Pyxis reads `[V4+ Styles]` and uses the **first defined style** as the reference:
 * **`Fontname`:** Font family installed on the system or located in `%APPDATA%\PyxisNodes\fonts\`.
-* **`Fontsize`:** Primary typographic height in script pixels (e.g. `65` to `80` for 1080p).
+* **`Fontsize`:** Text height in script pixels (e.g. `65` to `80` for 1080p).
 * **`PrimaryColour` (`&HAABBGGRR&`):** Main glyph fill colour.
-* **`Outline` and `OutlineColour`:** Outline stroke width and colour for stroke nodes and concentric border rings.
+* **`Outline` and `OutlineColour`:** Outline width and colour, used by stroke nodes and concentric border rings.
 * **`Alignment`:** Standard ASS alignment (`5` for screen centre, `2` for lower third).
 
-### 5.4. Step 4: Define Representative Test Karaoke Events (`[Events]`)
-Structure the dialogue phrase to include varied syllable lengths and glyph shapes:
+### 5.4. Step 4: Define Test Karaoke Events (`[Events]`)
+Use a phrase with varied syllable lengths and glyph shapes:
 ```ini
 Dialogue: 0,0:00:03.00,0:00:09.00,Default,,0,0,0,,{\k45}Kyou{\k40}kai {\k60}no {\k50}Ka{\k55}na{\k70}ta
 ```
-* **Short Syllables ($\le 200\text{ ms}$):** Ideal for verifying high-velocity impacts, snap eases, and elastic rebounds.
-* **Sustained Syllables ($\ge 600\text{ ms}$):** Optimal for observing continuous harmonic oscillators (`Tag Oscillator`) or continuous particle emission trails.
-* **Complex Glyphs:** Include dense Kanji characters or letters with isolated counter-spaces (`B`, `P`, `o`, `8`) to audit Clipper2 polygon orientation and winding rules.
+* **Short syllables ($\le 200\text{ ms}$):** Good for checking fast impacts, snap eases, and elastic rebounds.
+* **Sustained syllables ($\ge 600\text{ ms}$):** Good for watching continuous oscillators (`Tag Oscillator`) or particle emission trails.
+* **Complex glyphs:** Include dense Kanji or letters with enclosed counters (`B`, `P`, `o`, `8`) to check Clipper2 polygon orientation and winding rules.
 
 ---
 
-## 6. Master Production Reference Template (Full HD 1080p)
+## 6. Reference Template (Full HD 1080p)
 
-The following listing is a complete, production-ready `preview_base.ass` script configured for Full HD 1080p at 23.976 FPS with high-contrast background shading:
+A complete `preview_base.ass` for Full HD 1080p at 23.976 FPS with a high-contrast background:
 
 ```ini
 [Script Info]
@@ -205,11 +205,11 @@ Dialogue: 0,0:00:03.00,0:00:08.50,Default,,0,0,0,,{\k45}Py{\k35}xis {\k60}Ef{\k5
 
 ---
 
-## 7. Recommended Production Workflows
+## 7. Recommended Workflows
 
-1. **Synthetic Video Sharing:**
-   * When publishing template graphs for community sharing, configure the base environment with `?dummy:...`. This ensures that downstream users can open and preview your effects without encountering missing media alerts.
-2. **Local Font Staging:**
-   * When designing with boutique or custom display typography, place your `.ttf` or `.otf` font files in `%APPDATA%\PyxisNodes\fonts\`. Pyxis vectorises and renders these fonts locally via FreeType/HarfBuzz without requiring system-wide installation.
-3. **Factory Reset Procedure:**
-   * To restore the base environment to its initial distribution defaults, close Pyxis Effector, delete `%APPDATA%\PyxisNodes\preview_base.ass`, and relaunch the application; the engine automatically writes a fresh copy.
+1. **Sharing templates:**
+   * When publishing template graphs, set the base environment to `?dummy:...` so other users can preview your effects without missing-media alerts.
+2. **Local fonts:**
+   * For custom or display fonts, put your `.ttf` or `.otf` files in `%APPDATA%\PyxisNodes\fonts\`. Pyxis vectorises and renders them locally via FreeType/HarfBuzz and libass, with no system-wide installation.
+3. **Factory reset:**
+   * To restore the defaults, close Pyxis Effector, delete `%APPDATA%\PyxisNodes\preview_base.ass`, and relaunch; the engine writes a fresh copy.

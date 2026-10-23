@@ -1,16 +1,16 @@
 # Entorno Base y Personalización
 
-El **Entorno Base** (`preview_base.ass`) proporciona un espacio de trabajo aislado para previsualizar y validar efectos sin depender del archivo de subtítulos principal cargado en Aegisub.
-Documenta el ciclo de vida del archivo en `%APPDATA%`, el modelo de ventana temporal del clip, su estructura de estilos y su recarga reactiva.
+El **Entorno Base** (`preview_base.ass`) es un espacio de trabajo aislado para previsualizar y probar efectos sin usar el archivo de subtítulos cargado en Aegisub.
+Esta página cubre el ciclo de vida del archivo en `%APPDATA%`, la ventana temporal del clip, su estructura de estilos y la recarga en caliente.
 
 ---
 
 ## 1. Arquitectura y Modos de Previsualización
 
-El nodo **`System/Previewer`** cuenta con un selector de origen que conmuta entre dos modos operativos:
+El nodo **`System/Previewer`** tiene un selector de origen con dos modos:
 
-* **Modo Proyecto Activo (Icono Aegisub):** Conecta el reproductor en tiempo real al vídeo, audio, estilos y líneas de diálogo actualmente cargadas en la sesión de Aegisub.
-* **Modo Plantilla Base (Icono Disco CD):** Desvincula temporalmente el reproductor del archivo de Aegisub y proyecta el efecto sobre el archivo `preview_base.ass` en un entorno de laboratorio estandarizado y reproducible.
+* **Modo Proyecto Activo (Icono Aegisub):** El reproductor usa el vídeo, audio, estilos y líneas de diálogo cargados en la sesión activa de Aegisub.
+* **Modo Plantilla Base (Icono Disco CD):** El reproductor se desvincula de Aegisub y proyecta el resultado del grafo sobre `preview_base.ass`, un entorno de pruebas fijo y reproducible.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -32,8 +32,8 @@ El nodo **`System/Previewer`** cuenta con un selector de origen que conmuta entr
 
 ## 2. Ciclo de Vida y Persistencia en `%APPDATA%`
 
-### 2.1. Ubicación Física en el Sistema Operativo
-El archivo base reside en el directorio de configuración de usuario de Windows:
+### 2.1. Ubicación en el Sistema
+El archivo base está en el directorio de configuración del perfil de usuario de Windows:
 
 ```
 %APPDATA%\PyxisNodes\preview_base.ass
@@ -41,32 +41,32 @@ El archivo base reside en el directorio de configuración de usuario de Windows:
 
 *(Ruta estándar: `C:\Users\<Usuario>\AppData\Roaming\PyxisNodes\preview_base.ass`)*.
 
-### 2.2. Política de Preservación e Inviolabilidad
-Pyxis Effector aplica una política de no sobrescritura sobre los datos de usuario:
-1. **Primera Ejecución:** Si el archivo no existe en `%APPDATA%\PyxisNodes\`, el motor copia automáticamente la plantilla maestra de fábrica incluida en el paquete de distribución.
-2. **Actualizaciones de Versión:** Una vez generado, **Pyxis jamás sobrescribe ni elimina este archivo**. Todas las personalizaciones de estilos, resoluciones, enlaces de vídeo y textos de prueba pertenecen de forma exclusiva al usuario y persisten entre actualizaciones del software.
+### 2.2. Política de No Sobrescritura
+Pyxis Effector nunca sobrescribe su copia del archivo:
+1. **Primera ejecución:** Si el archivo no existe en `%APPDATA%\PyxisNodes\`, el motor copia la plantilla por defecto incluida en la instalación.
+2. **Actualizaciones:** Una vez creado, **Pyxis jamás sobrescribe ni elimina este archivo**. Sus estilos, resoluciones, enlaces de vídeo y textos de prueba son del usuario y persisten entre versiones.
 
-### 2.3. Detección Reactiva por Hash SHA-256 (Recarga en Caliente)
-Para evitar la necesidad de reiniciar la aplicación o reinstanciar el nodo `System/Previewer` al modificar el entorno base, el backend inspecciona la firma criptográfica del archivo:
-* En cada compilación de previsualización, el motor calcula el hash `SHA-256` del archivo en disco.
-* Si el usuario edita y guarda `preview_base.ass` en Aegisub o en un editor de texto externo, el cambio de hash invalida automáticamente la caché en memoria (`_cached_preview_base_info`).
-* El visor actualiza inmediatamente la resolución nativa, la tasa de fotogramas, la pista sonora y la geometría tipográfica en caliente.
+### 2.3. Detección por Hash SHA-256 (Recarga en Caliente)
+No hace falta reiniciar la aplicación ni reinstanciar el nodo `System/Previewer` tras editar el entorno base. El backend comprueba el hash del archivo:
+* En cada compilación de previsualización, el motor calcula el hash `SHA-256` de `preview_base.ass` en disco.
+* Si el usuario edita y guarda `preview_base.ass` en Aegisub o en un editor de texto externo, el cambio de hash invalida la caché en memoria (`_cached_preview_base_info`).
+* El visor actualiza de inmediato la resolución, la tasa de fotogramas, la pista sonora y la geometría tipográfica.
 
 ---
 
-## 3. Modelo Matemático de la Ventana Temporal del Clip
+## 3. Ventana Temporal del Clip
 
-El motor de Pyxis no limita la reproducción a la duración estricta de las sílabas del archivo base; calcula dinámicamente una **ventana temporal con colchón (*Lead-In / Lead-Out Buffer*)** para permitir la evaluación completa de transiciones de entrada y salida:
+Pyxis no limita la reproducción a la duración de las sílabas del archivo base. Añade un **margen de entrada y salida (*lead-in / lead-out*)** para poder ver completas las transiciones de entrada y salida.
 
-### 3.1. Ecuaciones de Ventana Temporal
+### 3.1. Ecuaciones
 
-Sea $\mathcal{D} = \{d_1, d_2, \dots, d_m\}$ el conjunto de líneas de diálogo presentes en `preview_base.ass`, donde cada línea posee una marca de inicio $t_{\text{start}}(d_i)$ y de fin $t_{\text{end}}(d_i)$ en milisegundos:
+Sea $\mathcal{D} = \{d_1, d_2, \dots, d_m\}$ el conjunto de líneas de diálogo de `preview_base.ass`, donde cada línea tiene una marca de inicio $t_{\text{start}}(d_i)$ y de fin $t_{\text{end}}(d_i)$ en milisegundos:
 
 $$t_{\text{min}} = \min_{d \in \mathcal{D}} \big(t_{\text{start}}(d)\big)$$
 
 $$t_{\text{max}} = \max_{d \in \mathcal{D}} \big(t_{\text{end}}(d)\big)$$
 
-A partir de estos extremos, el motor establece los límites de reproducción del clip en segundos:
+A partir de estos extremos, el motor calcula el intervalo del clip en segundos:
 
 $$t_{\text{clip\_start}} = \max\left(0.0, \; \frac{t_{\text{min}} - 2000}{1000.0}\right)$$
 
@@ -76,16 +76,16 @@ $$T_{\text{clip\_dur}} = \max\left(2.0, \; t_{\text{clip\_end}} - t_{\text{clip\
 
 $$t_{\text{clip\_start\_ms}} = \lfloor t_{\text{clip\_start}} \times 1000 \rfloor$$
 
-### 3.2. Función Cinemática del Colchón de 2000 ms
-* **Evaluación de Nodos `Time/Lead In`:** Las animaciones espaciales que inician antes de la sílaba (ej. aproximaciones desde fuera de pantalla, aceleraciones exponenciales `accel` o apariciones progresivas) disponen de hasta 2000 ms previos para desarrollarse fluidamente.
-* **Evaluación de Nodos `Time/Lead Out`:** Los desvanecimientos posteriores (`\fad`, dispersión de partículas, disolución alfa) disponen de 2000 ms posteriores antes del corte del bucle de reproducción.
-* **Mapeo Relativo en el Scrubber:** La barra de transporte del nodo `Previewer` mapea el tiempo $00:00$ exactamente a $t_{\text{clip\_start\_ms}}$, garantizando que el usuario analice el intervalo relevante sin tiempos muertos iniciales del archivo de vídeo.
+### 3.2. Para Qué Sirve el Margen de 2000 ms
+* **Nodos `Time/Lead In`:** Las animaciones que empiezan antes de la sílaba (aproximaciones desde fuera de pantalla, aceleraciones exponenciales `accel`, apariciones progresivas) disponen de hasta 2000 ms previos.
+* **Nodos `Time/Lead Out`:** Las transiciones posteriores (`\fad`, dispersión de partículas, disolución alfa) disponen de 2000 ms de reproducción adicional antes de que el bucle vuelva a empezar.
+* **Scrubber:** La barra de transporte de `Previewer` mapea el tiempo relativo $00:00$ a $t_{\text{clip\_start\_ms}}$, de modo que no hay tiempo muerto al inicio de la línea de tiempo.
 
 ---
 
-## 4. Anatomía y Estructura del Archivo `preview_base.ass`
+## 4. Estructura de `preview_base.ass`
 
-El archivo `preview_base.ass` es un documento estándar de subtítulos ASS (*v4.00+*). Se divide en cuatro secciones operativas fundamentales:
+`preview_base.ass` es un archivo ASS estándar (*v4.00+*) con cuatro secciones:
 
 ```ini
 [Script Info]
@@ -119,65 +119,65 @@ Dialogue: 1,0:00:05.00,0:00:10.00,Default,,0,0,0,,{\k43}Ma{\k65}ry {\k44}te{\k87
 
 ---
 
-## 5. Guía de Personalización Técnica
+## 5. Guía de Personalización
 
 ### 5.1. Paso 1: Configurar la Resolución del Lienzo (`PlayResX` / `PlayResY`)
-La resolución del encabezado define el sistema de coordenadas cartesianas sobre el cual se calculan los anclajes absolutos y relativos:
-* **Resolución Full HD (1080p):**
+La resolución del encabezado define el plano de coordenadas para los anclajes absolutos y relativos:
+* **Full HD (1080p):**
   ```ini
   PlayResX: 1920
   PlayResY: 1080
   ```
-* **Resolución HD Estándar (720p):**
+* **HD (720p):**
   ```ini
   PlayResX: 1280
   PlayResY: 720
   ```
 > [!NOTE]
-> El motor de previsualización WebAssembly (`JASSUB`) y el reproductor de vídeo adaptan automáticamente la relación de aspecto ($\text{AR} = \text{PlayResX} / \text{PlayResY}$) y escalan los fotogramas para mantener las proporciones exactas sin distorsión anamórfica.
+> El renderizador WebAssembly (`JASSUB`) y el reproductor de vídeo se adaptan automáticamente a la relación de aspecto ($\text{AR} = \text{PlayResX} / \text{PlayResY}$) y escalan los fotogramas sin distorsión anamórfica.
 
-### 5.2. Paso 2: Configurar Fuentes Multimedia de Referencia
-En la sección `[Aegisub Project Garbage]`, se pueden vincular dos tipos de fuentes:
+### 5.2. Paso 2: Configurar los Medios de Referencia
+En la sección `[Aegisub Project Garbage]` se define el material de prueba:
 
 #### Opción A: Vídeo Virtual Sintético (*Dummy Video* - Recomendado)
-No requiere almacenar archivos de vídeo en disco y garantiza inicialización inmediata a 23.976 o 60 FPS:
+Arranca al instante a 23.976 o 60 FPS y no necesita ningún archivo de vídeo en disco:
 ```ini
 Video File: ?dummy:23.976000:40000:1920:1080:26:26:26:
 ```
 * **Sintaxis:** `?dummy:<FPS>:<Fotogramas>:<Ancho>:<Alto>:<R>:<G>:<B>:`
-* Los valores `26:26:26:` generan un fondo gris oscuro neutro que proporciona alto contraste visual para partículas blancas, sombras y contornos coloreados.
+* Los valores `26:26:26:` dan un fondo gris oscuro neutro, con buen contraste para partículas blancas, sombras y contornos de color.
 
 #### Opción B: Archivos Locales de Vídeo y Audio
-Cuando se requiera calibrar sincronismo labial, modulación acústica con `Audio/Modulator` o transitorios con `Audio/Waveform`, apunte a archivos multimedia locales:
+Para calibrar sincronismo labial, modulación con `Audio/Modulator` o transitorios con `Audio/Waveform`, apunte a un archivo multimedia local:
 ```ini
 Video File: C:\KaraokeResources\test_track_1080p.mp4
 Audio File: C:\KaraokeResources\test_track_1080p.mp4
 ```
 > [!TIP]
-> Si el archivo de vídeo contiene una pista de audio integrada, basta con declarar la ruta en `Video File`; Pyxis extraerá y enrutará automáticamente el flujo sonoro al motor PCM y al modulador espectral.
+> Si el vídeo tiene una pista de audio integrada, basta con indicar `Video File`; Pyxis extrae el audio y lo envía automáticamente al motor PCM y al analizador espectral.
 
-### 5.3. Paso 3: Calibrar Estilos Tipográficos (`[V4+ Styles]`)
-Pyxis inspecciona la sección `[V4+ Styles]` y extrae el **primer estilo definido** como estilo maestro por defecto:
-* **`Fontname`:** Familia tipográfica instalada en el sistema o alojada en `%APPDATA%\PyxisNodes\fonts\`.
-* **`Fontsize`:** Altura de referencia en píxeles de guion (ej. `65` a `80` para 1080p).
-* **`PrimaryColour` (`&HAABBGGRR&`):** Color del cuerpo del glifo.
-* **`Outline` y `OutlineColour`:** Grosor métrico y color del contorno inicial.
-* **`Alignment`:** Anclaje estándar ASS (`5` para centro exacto en pantalla o `2` para subtítulos inferiores).
+### 5.3. Paso 3: Ajustar el Estilo Base (`[V4+ Styles]`)
+Pyxis lee `[V4+ Styles]` y usa el **primer estilo definido** como referencia:
+* **`Fontname`:** Familia tipográfica instalada en el sistema o ubicada en `%APPDATA%\PyxisNodes\fonts\`.
+* **`Fontsize`:** Altura del texto en píxeles de guion (ej. `65` a `80` para 1080p).
+* **`PrimaryColour` (`&HAABBGGRR&`):** Color de relleno del glifo.
+* **`Outline` y `OutlineColour`:** Grosor y color del contorno inicial.
+* **`Alignment`:** Anclaje ASS estándar (`5` para centro de pantalla o `2` para subtítulos inferiores).
 
 ### 5.4. Paso 4: Definir la Frase de Prueba en `[Events]`
-La línea de diálogo base debe contener una variedad equilibrada de sílabas para probar diferentes condiciones geométricas:
+Use una frase con sílabas de duraciones variadas y distintas formas de glifo:
 ```ini
 Dialogue: 0,0:00:03.00,0:00:09.00,Default,,0,0,0,,{\k45}Kyou{\k40}kai {\k60}no {\k50}Ka{\k55}na{\k70}ta
 ```
-* **Sílabas cortas ($\le 200\text{ ms}$):** Útiles para validar transiciones rápidas de rebote (*Bounce*) o impactos cinéticos.
+* **Sílabas cortas ($\le 200\text{ ms}$):** Ideales para validar impactos de alta velocidad, transiciones rápidas (*snap eases*) y rebotes elásticos (*Bounce* / *elastic rebounds*).
 * **Sílabas largas ($\ge 600\text{ ms}$):** Ideales para observar osciladores continuos (`Tag Oscillator`), gradientes dinámicos o emisiones de partículas sostenidas.
-* **Complejidad glífica:** Incluir kanjis densos si se trabaja con morfología vectorial o caracteres con islas cerradas (ej. `B`, `P`, `o`, `8`) para verificar operaciones booleanas de unión y corte en Clipper2.
+* **Glifos complejos:** Incluya kanjis densos si trabaja con formas vectoriales, o caracteres con islas cerradas (ej. `B`, `P`, `o`, `8`), para verificar las operaciones booleanas de unión y corte en Clipper2, así como la orientación y las reglas de devanado (*winding rules*) de los polígonos.
 
 ---
 
-## 6. Plantilla Maestra Full HD 1080p de Referencia
+## 6. Plantilla de Referencia Full HD 1080p
 
-A continuación se proporciona una plantilla de `preview_base.ass` configurada para resolución Full HD 1080p a 23.976 FPS con fondo neutro de alto contraste:
+Plantilla de `preview_base.ass` para Full HD 1080p a 23.976 FPS con fondo neutro de alto contraste:
 
 ```ini
 [Script Info]
@@ -205,11 +205,11 @@ Dialogue: 0,0:00:03.00,0:00:08.50,Default,,0,0,0,,{\k45}Py{\k35}xis {\k60}Ef{\k5
 
 ---
 
-## 7. Buenas Prácticas de Flujo de Trabajo
+## 7. Flujos de Trabajo Recomendados
 
-1. **Uso de Vídeos Virtuales para Compartir Plantillas:**
-   * Al exportar grafos o plantillas para otros usuarios, mantenga el vídeo en modo `?dummy:...`. De este modo, cualquier diseñador podrá abrir la plantilla y previsualizarla sin requerir rutas absolutas de vídeo inexistentes en su máquina.
-2. **Pruebas Tipográficas con Fuentes Locales:**
-   * Al diseñar con tipografías experimentales, ubique los archivos `.ttf` o `.otf` en `%APPDATA%\PyxisNodes\fonts\`. Tanto el motor vectorial como `libass` cargarán automáticamente los glifos locales sin exigir su instalación en el sistema operativo Windows.
-3. **Procedimiento de Restablecimiento de Fábrica:**
-   * Para restaurar el archivo base a su configuración original de fábrica, cierre Pyxis Effector, elimine `%APPDATA%\PyxisNodes\preview_base.ass` y reinicie la aplicación; el motor regenerará una copia limpia automáticamente.
+1. **Compartir plantillas:**
+   * Al exportar grafos o plantillas para otros usuarios, deje el vídeo en modo `?dummy:...`. Así cualquiera podrá abrir y previsualizar la plantilla sin depender de rutas de vídeo que no existen en su máquina.
+2. **Fuentes locales:**
+   * Para tipografías experimentales, coloque los archivos `.ttf` o `.otf` en `%APPDATA%\PyxisNodes\fonts\`. Pyxis vectoriza y renderiza estas fuentes localmente mediante FreeType/HarfBuzz y libass, sin necesidad de instalarlas en Windows.
+3. **Restablecimiento de fábrica:**
+   * Para volver a la configuración original, cierre Pyxis Effector, elimine `%APPDATA%\PyxisNodes\preview_base.ass` y reinicie la aplicación; el motor regenerará una copia limpia.
