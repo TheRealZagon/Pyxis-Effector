@@ -35,6 +35,7 @@ Solo usa la biblioteca estándar.
 """
 
 import argparse
+import os
 import re
 import shutil
 import stat
@@ -161,10 +162,33 @@ def write_notice(dest_dir: Path, plat: str, info: dict) -> None:
     (dest_dir / "FFMPEG-NOTICE.txt").write_text("\n".join(lines), encoding="utf-8")
 
 
+def verify_download(binary: Path, plat: str, work: Path) -> None:
+    """Comprueba con codificaciones reales que el ffmpeg obtenido tiene lo que usa Pyxis.
+
+    Si falta algo, borra el binario y aborta. No puede ejecutar un ffmpeg de otra plataforma:
+    en ese caso solo avisa.
+    """
+    if plat != host_platform():
+        warn(f"No se puede ejecutar un ffmpeg de {plat} en esta máquina ({host_platform()}): no se comprobó que incluya libx264, libwebp, libass y AAC")
+        return
+    import build_ffmpeg
+    log("Verificando el binario")
+    try:
+        build_ffmpeg.verify_binary(binary, work, dict(os.environ), require_videotoolbox=False)
+    except (SystemExit, OSError) as exc:
+        binary.unlink(missing_ok=True)
+        raise SystemExit(f"El ffmpeg obtenido no sirve para Pyxis, se ha descartado: {exc}\n"
+                         "(--no-verify omite esta comprobación)")
+
+
 def install(plat: str, dest_dir: Path, *, url: Optional[str] = None, sha256: Optional[str] = None,
             path: Optional[str] = None, build: bool = False, build_options: Optional[dict] = None,
-            work: Optional[Path] = None) -> dict:
-    """Deja ffmpeg en ``dest_dir`` y devuelve un dict con su procedencia."""
+            work: Optional[Path] = None, verify: bool = True) -> dict:
+    """Deja ffmpeg en ``dest_dir`` y devuelve un dict con su procedencia.
+
+    Un ffmpeg descargado o local se comprueba además con codificaciones de prueba (``verify``);
+    el compilado ya las pasa dentro de ``build_ffmpeg.build``.
+    """
     dest_dir.mkdir(parents=True, exist_ok=True)
     name = exe_name(plat)
     dest = dest_dir / name
@@ -206,6 +230,8 @@ def install(plat: str, dest_dir: Path, *, url: Optional[str] = None, sha256: Opt
                 raise SystemExit(f"No se encontró {name} dentro de {archive.name}")
 
         dest.chmod(dest.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        if verify and not build:
+            verify_download(dest, plat, work)
         if plat == host_platform():
             info.update(describe_binary(dest))
         write_notice(dest_dir, plat, info)
@@ -226,6 +252,7 @@ def main() -> int:
     parser.add_argument("--build", action="store_true", help="compilarlo desde el código fuente en lugar de descargarlo")
     parser.add_argument("--ffmpeg-version", help="con --build: versión de ffmpeg a compilar")
     parser.add_argument("--jobs", type=int, help="con --build: trabajos de make en paralelo")
+    parser.add_argument("--no-verify", action="store_true", help="no probar con codificaciones reales el ffmpeg descargado o local")
     parser.add_argument("--list-sources", action="store_true", help="muestra el origen por defecto de cada plataforma y sale")
     args = parser.parse_args()
 
@@ -237,7 +264,7 @@ def main() -> int:
 
     plat = args.platform or host_platform()
     options = {k: v for k, v in (("version", args.ffmpeg_version), ("jobs", args.jobs)) if v}
-    install(plat, Path(args.out), url=args.url, sha256=args.sha256, path=args.path, build=args.build, build_options=options)
+    install(plat, Path(args.out), url=args.url, sha256=args.sha256, path=args.path, build=args.build, build_options=options, verify=not args.no_verify)
     return 0
 
 

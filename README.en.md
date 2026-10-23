@@ -39,7 +39,7 @@
   <a href="README.en.md"><img src="https://img.shields.io/badge/Language-English%20(en--GB)-2563EB.svg" alt="English (en-GB)"></a>
 </p>
 <p align="center">
-  <a href="README.md">Leer en Español</a> &bull; <strong>English (en-GB)</strong>
+  <a href="README.md">Leer en Español</a> &bull; <strong>English</strong>
 </p>
 
 ---
@@ -68,7 +68,7 @@ The name comes from the **Pyxis** constellation (the Mariner's Compass), and ref
 
 ## Official Technical Manual
 
-The technical manual is split into 12 volumes, in British English in [`PyxisNodes/docs/en/`](PyxisNodes/docs/en/) (Spanish version in [`PyxisNodes/docs/es/`](PyxisNodes/docs/es/)):
+The technical manual is split into 12 volumes, available in English at [`PyxisNodes/docs/en/`]:
 
 | Volume | Title | Primary Technical Scope |
 | :---: | :--- | :--- |
@@ -141,6 +141,8 @@ The rest of this section covers **installing from source**.
 | wmctrl / xdotool | Optional | Raising window focus | `wmctrl` / `xdotool` | same |
 
 \* You need **one** of the two graphical backends. GTK (WebKitGTK) is the recommended one.
+
+The system `ffmpeg` must include libx264, libwebp, libass (the `subtitles` filter) and AAC. Check with `ffmpeg -encoders | grep -E 'libx264|libwebp'` and `ffmpeg -filters | grep subtitles`.
 
 Aegisub is available in most distributions (`aegisub` or `aegisub-git`).
 
@@ -266,7 +268,7 @@ brew install python ffmpeg        # Python ≥ 3.10; /usr/bin/python3 is too old
 cd PyxisNodes && ./install_macos.sh
 ```
 
-Then copy `PyxisNodes/` and `pyxis.NodeEngine.lua` into Aegisub's `autoload` folder. The macro uses `PyxisNodes/.venv/bin/python3` if there is no runtime in `PyxisNodes/python/`.
+The ffmpeg must meet the same requirements as on [Linux](#system-requirements-installing-from-source). Then copy `PyxisNodes/` and `pyxis.NodeEngine.lua` into Aegisub's `autoload` folder. The macro uses `PyxisNodes/.venv/bin/python3` if there is no runtime in `PyxisNodes/python/`.
 
 Standalone use: `PyxisNodes/.venv/bin/python PyxisNodes/main.py`.
 
@@ -276,7 +278,7 @@ Standalone use: `PyxisNodes/.venv/bin/python PyxisNodes/main.py`.
 |---|---|
 | Interface | Cocoa/WebKit (pywebview) |
 | Font metrics and outlines | FreeType; fonts are located in `/System/Library/Fonts`, `/Library/Fonts` and `~/Library/Fonts` |
-| Video encoding | `h264_videotoolbox` if ffmpeg includes it; otherwise x264 |
+| Video encoding | Hardsub export: `h264_videotoolbox` if ffmpeg includes it; otherwise x264. Preview clips and background videos always use x264 |
 | GPU OpenCL | Optional (Apple has deprecated it); if it fails, the CPU is used |
 | libass telemetry (`libass_profiler`) | Only through Wine (see below); without Wine, a handled error |
 | Child process cleanup | Parent-process watchdog in each worker |
@@ -323,7 +325,7 @@ Pyxis Effector uses the following open-source libraries and components:
 * [**Marked.js**](https://marked.js.org/): Markdown parser and compiler for integrated documentation and tooltips (MIT Licence).
 * [**Lupa**](https://github.com/scoder/lupa): C bridge between Python and LuaJIT / Lua 5.1 (MIT Licence).
 * [**PyWebView**](https://pywebview.flowrl.com/): Native desktop webview window for Windows, macOS and Linux (BSD-3 Licence).
-* [**FFmpeg**](https://ffmpeg.org/): Multimedia decoding, PCM stream extraction, and video processing. The core is LGPL v2.1+, but the packages ship **GPL v2+** builds (with libx264, libass and libwebp) from [BtbN](https://github.com/BtbN/FFmpeg-Builds) (Windows and Linux) and [martin-riedl.de](https://ffmpeg.martin-riedl.de) (macOS).
+* [**FFmpeg**](https://ffmpeg.org/): Multimedia decoding, PCM stream extraction, and video processing. The core is LGPL v2.1+, but the packages ship **GPL v3** builds (with libx264, libass and libwebp; configured with `--enable-gpl --enable-version3`) from [BtbN](https://github.com/BtbN/FFmpeg-Builds) (Windows and Linux) and [martin-riedl.de](https://ffmpeg.martin-riedl.de) (macOS). An ffmpeg you compile with `tools/build_ffmpeg.py` is **GPL v2+**.
 * [**Python**](https://www.python.org/) via [**python-build-standalone**](https://github.com/astral-sh/python-build-standalone): Standalone interpreter bundled in every package (PSF Licence).
 * [**PyQt6**](https://www.riverbankcomputing.com/software/pyqt/) / [**Qt WebEngine**](https://www.qt.io/): Graphical interface bundled in the Linux packages (GPL v3 / LGPL v3 Licences).
 * [**FreeType**](https://freetype.org/) / [**freetype-py**](https://github.com/rougier/freetype-py): Font metrics and outlines on Linux and macOS (FreeType / BSD Licences).

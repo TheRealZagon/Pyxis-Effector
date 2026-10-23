@@ -153,8 +153,12 @@ def extract(tarball: Path, dest: Path) -> Path:
     return dest / top
 
 
-def verify_binary(ffmpeg: Path, work: Path, env: dict) -> None:
-    """Falla si al binario le falta algo que Pyxis usa, probándolo de verdad (no solo mirando -encoders)."""
+def verify_binary(ffmpeg: Path, work: Path, env: dict, require_videotoolbox: bool = True) -> None:
+    """Falla si al binario le falta algo que Pyxis usa, probándolo de verdad (no solo mirando -encoders).
+
+    ``require_videotoolbox`` solo afecta a macOS: un ffmpeg compilado aquí lo habilita siempre, pero uno
+    descargado puede no llevarlo y Pyxis recurre entonces a x264, así que en ese caso solo se avisa.
+    """
     def ff(*args) -> subprocess.CompletedProcess:
         return subprocess.run([str(ffmpeg), "-hide_banner", "-v", "error", *args], cwd=work, capture_output=True, text=True)
 
@@ -163,9 +167,12 @@ def verify_binary(ffmpeg: Path, work: Path, env: dict) -> None:
     missing = [e for e in REQUIRED_ENCODERS if not re.search(rf"\s{e}\s", encoders)]
     missing += [f for f in REQUIRED_FILTERS if not re.search(rf"\s{f}\s", filters)]
     if sys.platform == "darwin" and "h264_videotoolbox" not in encoders:
-        missing.append("h264_videotoolbox")
+        if require_videotoolbox:
+            missing.append("h264_videotoolbox")
+        else:
+            warn("este ffmpeg no incluye h264_videotoolbox: la exportación hardsub usará x264 por software")
     if missing:
-        raise BuildError("El ffmpeg compilado no incluye: " + ", ".join(missing))
+        raise BuildError("El ffmpeg no incluye: " + ", ".join(missing))
 
     (work / "probe.ass").write_text(
         "[Script Info]\nScriptType: v4.00+\nPlayResX: 320\nPlayResY: 240\n\n[V4+ Styles]\n"

@@ -22,8 +22,8 @@ etiqueta `v*`.
 ## ffmpeg
 
 Pyxis necesita un ffmpeg con **libx264**, **libwebp** y **libass** (el filtro `subtitles` que
-incrusta los subtítulos en el vídeo), además de AAC. Los scripts comprueban esto con
-codificaciones de prueba reales y rechazan un binario al que le falte algo.
+incrusta los subtítulos en el vídeo), además de AAC. Tanto si se descarga como si se compila,
+el binario se prueba con codificaciones reales y se rechaza si le falta algo (ver más abajo).
 
 FFmpeg solo publica código fuente: los binarios que enlaza [ffmpeg.org/download.html](https://ffmpeg.org/download.html)
 los compilan terceros. Por eso hay dos vías.
@@ -37,6 +37,12 @@ los compilan terceros. Por eso hay dos vías.
 
 `python tools/get_ffmpeg.py --list-sources` muestra las URL y los hashes que se usarían ahora.
 Si el hash no coincide, el script aborta sin instalar nada.
+
+Después se prueba el binario con las mismas codificaciones que usa `build_ffmpeg.py` (libx264, AAC,
+libwebp, el filtro `subtitles`, `scale`+`pad`); si falta algo, se borra y el script falla. En macOS, que
+falte VideoToolbox solo avisa (Pyxis usa x264). Un binario de otra plataforma no se puede ejecutar aquí:
+se avisa y no se comprueba. `--no-verify` (`--ffmpeg-no-verify` en `build_release.py`) omite la prueba,
+y también se aplica a `--url` y `--path`.
 
 Otros builds que enlaza ffmpeg.org se pueden usar con `--url` (y `--sha256` si lo publican):
 
@@ -129,6 +135,8 @@ no debe cambiar**.
 
 ## Licencia
 
-Los builds que se incluyen y los que se compilan con estas opciones son **GPL** (libx264). El código
+Los builds que se incluyen y los que se compilan con estas opciones son **GPL** (libx264). Los alojados
+(BtbN y martin-riedl.de) se configuran con `--enable-gpl --enable-version3`, así que son **GPL v3**; el que
+compila `build_ffmpeg.py` usa `--enable-gpl` sin `--enable-version3` y es **GPL v2+**. El código
 de Pyxis también es GPL-3.0. El paquete lleva `bin/FFMPEG-NOTICE.txt` con el origen del binario, el
 SHA-256 y dónde obtener su código fuente (`ffmpeg -buildconf` da la configuración exacta).

@@ -39,7 +39,7 @@
   <a href="README.en.md"><img src="https://img.shields.io/badge/Language-English-6B7280.svg" alt="English"></a>
 </p>
 <p align="center">
-  <strong>Español</strong> &bull; <a href="README.en.md">Read in English (en-GB)</a>
+  <strong>Español</strong> &bull; <a href="README.en.md">Read in English</a>
 </p>
 
 ---
@@ -68,7 +68,7 @@ El nombre viene de la constelación de **Pyxis** (la Brújula náutica), y alude
 
 ## Manual Técnico Oficial
 
-La documentación técnica está dividida en 12 volúmenes, en [`PyxisNodes/docs/es/`](PyxisNodes/docs/es/) (versión en inglés británico en [`PyxisNodes/docs/en/`](PyxisNodes/docs/en/)):
+La documentación técnica está dividida en 12 volúmenes, disponibles en [`PyxisNodes/docs/es/`](PyxisNodes/docs/es/):
 
 | Volumen | Título | Ámbito Técnico Principal |
 | :---: | :--- | :--- |
@@ -141,6 +141,8 @@ El resto de esta sección describe la **instalación desde el código fuente**.
 | wmctrl / xdotool | Opcional | Elevar el foco de la ventana | `wmctrl` / `xdotool` | igual |
 
 \* Se necesita **uno** de los dos backends gráficos. GTK (WebKitGTK) es el recomendado.
+
+El `ffmpeg` del sistema debe incluir libx264, libwebp, libass (el filtro `subtitles`) y AAC. Compruébalo con `ffmpeg -encoders | grep -E 'libx264|libwebp'` y `ffmpeg -filters | grep subtitles`.
 
 Aegisub está disponible en la mayoría de distribuciones (`aegisub` o `aegisub-git`).
 
@@ -266,7 +268,7 @@ brew install python ffmpeg        # Python ≥ 3.10; /usr/bin/python3 es demasia
 cd PyxisNodes && ./install_macos.sh
 ```
 
-Después copia `PyxisNodes/` y `pyxis.NodeEngine.lua` a la carpeta `autoload` de Aegisub. La macro usa `PyxisNodes/.venv/bin/python3` si no hay un runtime en `PyxisNodes/python/`.
+El ffmpeg debe cumplir los mismos requisitos que en [Linux](#requisitos-del-sistema-instalación-desde-el-código-fuente). Después copia `PyxisNodes/` y `pyxis.NodeEngine.lua` a la carpeta `autoload` de Aegisub. La macro usa `PyxisNodes/.venv/bin/python3` si no hay un runtime en `PyxisNodes/python/`.
 
 Uso independiente: `PyxisNodes/.venv/bin/python PyxisNodes/main.py`.
 
@@ -276,7 +278,7 @@ Uso independiente: `PyxisNodes/.venv/bin/python PyxisNodes/main.py`.
 |---|---|
 | Interfaz | Cocoa/WebKit (pywebview) |
 | Métricas y contornos tipográficos | FreeType; las fuentes se localizan en `/System/Library/Fonts`, `/Library/Fonts` y `~/Library/Fonts` |
-| Codificación de vídeo | `h264_videotoolbox` si ffmpeg lo incluye; si no, x264 |
+| Codificación de vídeo | Exportación hardsub: `h264_videotoolbox` si ffmpeg lo incluye; si no, x264. Los clips de previsualización y los fondos de vídeo usan siempre x264 |
 | GPU OpenCL | Opcional (Apple lo considera obsoleto); si falla, se usa la CPU |
 | Telemetría libass (`libass_profiler`) | Solo mediante Wine (ver abajo); sin Wine, error controlado |
 | Limpieza de procesos hijos | Vigilancia del proceso padre en cada worker |
@@ -323,7 +325,7 @@ Pyxis Effector usa las siguientes librerías y componentes de código abierto:
 * [**Marked.js**](https://marked.js.org/): Compilador de Markdown para la documentación integrada y tooltips contextuales (Licencia MIT).
 * [**Lupa**](https://github.com/scoder/lupa): Puente de comunicación bidireccional en C entre Python y LuaJIT / Lua 5.1 (Licencia MIT).
 * [**PyWebView**](https://pywebview.flowrl.com/): Capa de ventana web nativa de escritorio para Windows, macOS y Linux (Licencia BSD-3).
-* [**FFmpeg**](https://ffmpeg.org/): Decodificación multimedia, extracción de pistas PCM y procesado de vídeo. El núcleo es LGPL v2.1+, pero los paquetes incluyen compilaciones **GPL v2+** (con libx264, libass y libwebp) de [BtbN](https://github.com/BtbN/FFmpeg-Builds) (Windows y Linux) y de [martin-riedl.de](https://ffmpeg.martin-riedl.de) (macOS).
+* [**FFmpeg**](https://ffmpeg.org/): Decodificación multimedia, extracción de pistas PCM y procesado de vídeo. El núcleo es LGPL v2.1+, pero los paquetes incluyen compilaciones **GPL v3** (con libx264, libass y libwebp; se configuran con `--enable-gpl --enable-version3`) de [BtbN](https://github.com/BtbN/FFmpeg-Builds) (Windows y Linux) y de [martin-riedl.de](https://ffmpeg.martin-riedl.de) (macOS). Un ffmpeg compilado con `tools/build_ffmpeg.py` es **GPL v2+**.
 * [**Python**](https://www.python.org/) mediante [**python-build-standalone**](https://github.com/astral-sh/python-build-standalone): Intérprete independiente incluido en cada paquete (Licencia PSF).
 * [**PyQt6**](https://www.riverbankcomputing.com/software/pyqt/) / [**Qt WebEngine**](https://www.qt.io/): Interfaz gráfica incluida en los paquetes de Linux (Licencias GPL v3 / LGPL v3).
 * [**FreeType**](https://freetype.org/) / [**freetype-py**](https://github.com/rougier/freetype-py): Métricas y contornos tipográficos en Linux y macOS (Licencias FreeType / BSD).

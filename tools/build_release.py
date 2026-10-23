@@ -188,7 +188,7 @@ def install_ffmpeg(stage_bin: Path, plat: str, args, work: Path) -> Optional[dic
         return None
     return get_ffmpeg.install(
         plat, stage_bin, url=args.ffmpeg_url, sha256=args.ffmpeg_sha256, path=args.ffmpeg_path,
-        build=args.ffmpeg_build, work=work,
+        build=args.ffmpeg_build, work=work, verify=not args.ffmpeg_no_verify,
     )
 
 
@@ -238,6 +238,7 @@ def main() -> int:
     ff.add_argument("--ffmpeg-sha256", help="SHA-256 esperado de --ffmpeg-url")
     ff.add_argument("--ffmpeg-path", help="usar un ffmpeg local (binario o archivo que lo contenga)")
     ff.add_argument("--ffmpeg-build", action="store_true", help="compilar ffmpeg desde el código fuente (Linux/macOS; ver tools/build_ffmpeg.py)")
+    ff.add_argument("--ffmpeg-no-verify", action="store_true", help="no probar con codificaciones reales el ffmpeg descargado o local")
     ff.add_argument("--no-ffmpeg", action="store_true", help="no incluir ffmpeg")
     parser.add_argument("--no-qt", action="store_true", help="en Linux, no incluir Qt WebEngine (se usará WebKitGTK del sistema)")
     parser.add_argument("--out", default=str(REPO_ROOT / "dist"), help="carpeta de salida (por defecto dist/)")

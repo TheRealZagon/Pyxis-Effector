@@ -71,7 +71,7 @@ Queues are sorted once all branches have finished:
 
 ## 2. Node `System/Previewer` (WebAssembly Real-Time Player)
 
-Plays video and subtitles in real time using WebAssembly (JASSUB/libass). Playback is limited to the time window of the effect and needs no pre-rendering.
+Plays video and subtitles in real time using WebAssembly (JASSUB/libass). Playback is limited to the time window of the effect. Your video and audio are streamed as they are, with no pre-rendering; with no media loaded, the player uses a placeholder clip that FFmpeg generates once and caches.
 
 ![System/Previewer](img/previewer.jpg)
 
@@ -88,7 +88,7 @@ Plays video and subtitles in real time using WebAssembly (JASSUB/libass). Playba
    * Recompiles the branches wired to `Output`, updates the subtitle track in JASSUB/libass and profiles the generated lines.
    * **Scene coexistence:** Only the original lines replaced by the `Output` scope (`Sel. Lines`, `Style Lines`, `All Lines`) are commented out in the viewport. Other dialogue and signs stay visible.
 4. **`[1.4] Hardsub Render Button (FFmpeg Export)`:**
-   * Opens the export dialogue to burn the subtitles (*hardsub*) into an MP4 file with FFmpeg. Transcoding only runs when this button is used.
+   * Opens the export dialogue to burn the subtitles (*hardsub*) into an MP4 file with FFmpeg. The export only runs when you use this button. (Elsewhere FFmpeg only generates the placeholder clip above and optimises a canvas background video once, when you choose it.)
 
 ### 2.3. Transport Bar and Playback Controls
 1. **`[2.1] Relative Scrubber Bar:`** Draggable timeline over the effect duration ($0 \dots T_{\text{dur}}$), synchronised per frame (`requestAnimationFrame`).

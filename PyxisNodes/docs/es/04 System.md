@@ -71,7 +71,7 @@ Las colas se ordenan cuando todas las ramas han terminado:
 
 ## 2. Nodo `System/Previewer` (Reproductor en Tiempo Real WebAssembly)
 
-Reproduce video y subtítulos en tiempo real con WebAssembly (JASSUB/libass). La reproducción se limita al intervalo temporal del efecto y no requiere transcodificación previa.
+Reproduce video y subtítulos en tiempo real con WebAssembly (JASSUB/libass). La reproducción se limita al intervalo temporal del efecto. El vídeo y el audio del usuario se reproducen tal cual, sin transcodificación previa; si no hay medios cargados, el reproductor usa un clip de relleno que FFmpeg genera una vez y guarda en caché.
 
 ![System/Previewer](img/previewer.jpg)
 
@@ -88,7 +88,7 @@ Reproduce video y subtítulos en tiempo real con WebAssembly (JASSUB/libass). La
    * Recompila las ramas conectadas a `Output`, actualiza la pista de subtítulos en JASSUB/libass y mide el rendimiento de las líneas generadas.
    * **Coexistencia en escena:** En el visor solo se comentan las líneas originales reemplazadas por el ámbito de `Output` (`Sel. Lines`, `Style Lines`, `All Lines`). El resto de diálogos y carteles siguen visibles.
 4. **`[1.4] Botón Renderizar Hardsub (Exportación FFmpeg)`:**
-   * Abre el asistente de exportación para incrustar los subtítulos (*hardsub*) en un MP4 con FFmpeg. La codificación solo se ejecuta al accionar este botón.
+   * Abre el asistente de exportación para incrustar los subtítulos (*hardsub*) en un MP4 con FFmpeg. La exportación solo se ejecuta al accionar este botón. (En el resto de casos FFmpeg solo genera el clip de relleno anterior y optimiza una vez el vídeo de fondo del lienzo cuando se elige.)
 
 ### 2.3. Barra de Transporte y Controles de Reproducción
 1. **`[2.1] Barra de Desplazamiento Relativa:`** Línea temporal acotada a la duración del efecto ($0 \dots T_{\text{dur}}$), sincronizada por fotograma (`requestAnimationFrame`).
